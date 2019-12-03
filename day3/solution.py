@@ -4,8 +4,6 @@ inputFile = 'input.txt'
 if (isTest):
     inputFile = 'test.txt'
 
-dictList = []
-
 def getPositionMap(inputLine):
     positions = {}
     split = inputLine.split(',')
@@ -39,17 +37,16 @@ def getPositionMap(inputLine):
             positions[(x, y)] = movCounter
     return positions
 
+dictList = []
 for line in open(inputFile, 'r'):
     dictList.append(getPositionMap(line))
-
-reqDicts = len(dictList)
 
 def allHavePosition(dicts, pos):
     count = 0
     for dt in dicts:
         if (dt.get(pos, 0) > 0):
             count += 1
-    if reqDicts == count:
+    if len(dicts) == count:
         return True
     return False
 
