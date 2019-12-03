@@ -37,27 +37,11 @@ def getPositionMap(inputLine):
             y += 1 * mult
             movCounter += 1
             positions[(x, y)] = movCounter
-
     return positions
 
 for line in open(inputFile, 'r'):
     dictList.append(getPositionMap(line))
 
-maxX = -9999999999
-maxY = -9999999999
-
-#print(dictList)
-#quit()
-
-for dt in dictList:
-    for k in dt.keys():
-        if (abs(k[0]) > maxX):
-            maxX = abs(k[0])
-        if (abs(k[1]) > maxY):
-            maxY = abs(k[1])
-
-found = False
-cRange = 1
 reqDicts = len(dictList)
 
 def allHavePosition(dicts, pos):
@@ -65,15 +49,10 @@ def allHavePosition(dicts, pos):
     for dt in dicts:
         if (dt.get(pos, 0) > 0):
             count += 1
-    if len(dicts) == count:
+    if reqDicts == count:
         return True
     return False
 
-matches = []
-
-print(maxX, maxY)
-print(len(dictList[0]))
-print(len(dictList[1]))
 
 def stepSum(dicts, pos):
     sum = 0
@@ -81,27 +60,11 @@ def stepSum(dicts, pos):
         sum += d[pos]
     return sum
 
+matches = []
 for ma in dictList[0].keys():
     if (allHavePosition(dictList, ma)):
         matches.append((ma, stepSum(dictList, ma)))
 
-    continue
-
-   #  for rX in range(cRange * -1, cRange + 1):
-   #      if (allHavePosition(dictList, (rX, cRange))):
-   #          matches.append((rX, cRange))
-   #      elif (allHavePosition(dictList, (rX, cRange * -1))):
-   #          matches.append((rX, cRange * -1))
-
-   #  for rY in range (cRange * -1, cRange + 1):
-   #      if (allHavePosition(dictList, (cRange, rY))):
-   #          matches.append((cRange, rY))
-   #      if (allHavePosition(dictList, (cRange * -1, rY))):
-   #          matches.append((cRange * -1, rY))
-   #  cRange += 1
-
-print('matches')
-print(matches)
 minLen = matches[0][1]
 minP = matches[0]
 
