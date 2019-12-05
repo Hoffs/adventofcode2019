@@ -1,6 +1,9 @@
 
 def getOpInfo(op):
-    pass
+    opCode = int(op[-2:])
+    modA = int(op[0])
+    modB = int(op[1])
+    return (opCode, modA, modB) 
 
 def runCalculations(tInput):
     currPos = 0
