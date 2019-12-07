@@ -39,6 +39,7 @@ def runCalculations(tInput):
             currPos += 2
         elif opCode == 4:
             a = getValue(tInput, currPos + 1, modFirst)
+            print(a)
             currPos += 2
         elif opCode == 5:
             a = getValue(tInput, currPos + 1, modFirst)
