@@ -1,4 +1,7 @@
 import itertools
+import sys
+
+IS_DEBUG = False
 
 def parseOp(op):
     op = str(op).rjust(5, '0')
@@ -8,15 +11,32 @@ def parseOp(op):
     modFirst = int(op[2])
     return (opCode, modFirst, modSecond, modThird) 
 
+def dprint(*objects, sep=' ', end='\n', file=sys.stdout, flush=False):
+    if IS_DEBUG:
+        print(*objects, sep=' ', end='\n', file=sys.stdout, flush=False)
+
+def getAddress(inArr, pos, mod, relBase):
+    try:
+        if mod == 0:
+            return inArr[pos]
+        elif mod == 1:
+            return pos
+        elif mod == 2:
+            return inArr[pos] + relBase
+    except IndexError:
+        return 0
+
 def getValue(inArr, pos, mod, relBase):
-    if mod == 0:
-        return int(inArr[int(inArr[pos])])
-    elif mod == 1:
-        return int(inArr[pos])
-    elif mod == 2:
-        return int(inArr[int(inArr[relBase + pos])])
-    else:
-        raise Exception('Bad modifier ' + mod)
+    dprint('DEBUG GET', 'pos', pos, 'mod', mod, 'rel', relBase)
+    try:
+        return int(inArr[getAddress(inArr, pos, mod, relBase)])
+    except IndexError:
+        return 0
+
+def assignValue(inArr, pos, value):
+    if (pos >= len(inArr)):
+        inArr += (list([0 for x in range(0, pos - len(inArr) + 1)]))
+    inArr[pos] = value
 
 def inputFetcher(inputs):
     idx = 0
@@ -41,23 +61,24 @@ def runnerVM(memory, fetchInput):
 
     while True:
         (opCode, modFirst, modSecond, modThird) = parseOp(memory[currPos])
+        dprint('DEBUG', 'relative base', relBase, 'pos', currPos, 'op', opCode, 'memory', memory)
 
         if opCode == 1:
             a = getValue(memory, currPos + 1, modFirst, relBase)
             b = getValue(memory, currPos + 2, modSecond, relBase)
-            c = getValue(memory, currPos + 3, 1)
-            memory[c] = a + b
+            c = getAddress(memory, currPos + 3, modThird, relBase)
+            assignValue(memory, c, a + b)
             currPos += 4
         elif opCode == 2:
             a = getValue(memory, currPos + 1, modFirst, relBase)
             b = getValue(memory, currPos + 2, modSecond, relBase)
-            c = getValue(memory, currPos + 3, 1)
+            c = getAddress(memory, currPos + 3, modThird, relBase)
             currPos += 4
-            memory[c] = a * b
+            assignValue(memory, c, a * b)
         elif opCode == 3:
             inpt = fetchInput()
-            c = getValue(memory, currPos + 1, 1)
-            memory[c] = inpt
+            c = getAddress(memory, currPos + 1, modFirst, relBase)
+            assignValue(memory, c, inpt)
             currPos += 2
         elif opCode == 4:
             a = getValue(memory, currPos + 1, modFirst, relBase)
@@ -80,24 +101,24 @@ def runnerVM(memory, fetchInput):
         elif opCode == 7:
             a = getValue(memory, currPos + 1, modFirst, relBase)
             b = getValue(memory, currPos + 2, modSecond, relBase)
-            c = getValue(memory, currPos + 3, 1)
+            c = getAddress(memory, currPos + 3, modThird, relBase)
             if a < b:
-                memory[c] = 1
+                assignValue(memory, c, 1)
             else:
-                memory[c] = 0
+                assignValue(memory, c, 0)
             currPos += 4
         elif opCode == 8:
             a = getValue(memory, currPos + 1, modFirst, relBase)
             b = getValue(memory, currPos + 2, modSecond, relBase)
-            c = getValue(memory, currPos + 3, 1)
+            c = getAddress(memory, currPos + 3, modThird, relBase)
             if a == b:
-                memory[c] = 1
+                assignValue(memory, c, 1)
             else:
-                memory[c] = 0
+                assignValue(memory, c, 0)
             currPos += 4
         elif opCode == 9:
             a = getValue(memory, currPos + 1, modFirst, relBase)
-            relBase = a
+            relBase += a
             currPos += 2
         elif opCode == 99:
             return
@@ -112,7 +133,7 @@ def wrapperVM(memory, inputs):
     return (runnerVM(memory, fetch), add)
 
 
-isTest = True
+isTest = False
 inputFile = 'input.txt'
 if (isTest):
     inputFile = 'test.txt'
@@ -122,7 +143,7 @@ program = []
 for line in open(inputFile, 'r'):
     program = [int(x.strip()) for x in line.split(',')]
 
-(vm, add) = wrapperVM(program, [1])
+(vm, add) = wrapperVM(program, [2])
 
 for r in vm:
     print(r)
