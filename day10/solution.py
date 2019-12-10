@@ -21,55 +21,25 @@ for line in open(inputFile, 'r'):
         x += 1
     y += 1
 
-# Reduce by 1 from last iteration
-gridW = x - 1
-gridH = y - 1
-
 # pattern - x, y
 def normalizePattern(pattern):
     x, y = pattern
     factor = math.gcd(abs(x), abs(y))
     return (x // factor, y // factor)
 
-def countDetectable(pos, grid):
-    count = 0
-    sX, sY = pos
-    expLv = 1
-    patterns = [] # +x, +y from sX, sY normalized to greatest common factor
-
-    while True: # Make this use more sensible condition
-        # Bounds
-        minX = max(0, sX - expLv)
-        maxX = min(gridW, sX + expLv)
-
-        minY = max(0, sY - expLv)
-        maxY = min(gridH, sY + expLv)
-
-        print(minX, minY, maxX, maxY)
-
-        # check X axis
-        cY = sX + expLv
-
-        if minX == 0 and minY == 0 and maxX == gridW and maxY == gridH:
-            break
-        expLv += 1
 
 DEBUG=False
-
 def dprint(*objects, sep=' ', end='\n', file=sys.stdout, flush=False):
     if DEBUG:
         print(*objects, sep=' ', end='\n', file=sys.stdout, flush=False)
 
 def getPatternRepeats(cX, cY, dX, dY, pattern):
-    dprint('repeats for pattern', pattern, 'from', cX, cY, 'to', dX, dY)
     pX, pY = pattern
     c = 0
-    tX, tY = int(cX), int(cY)
-    while tX != dX or tY != dY:
-        tX += pX
-        tY += pY
+    while cX != dX or cY != dY:
+        cX += pX
+        cY += pY
         c += 1
-    dprint('repeats for pattern', pattern, 'is', c)
     return c
 
 def findDetectablePatternsNaiive(cPos, asteroids):
@@ -82,6 +52,7 @@ def findDetectablePatternsNaiive(cPos, asteroids):
         normPattern = normalizePattern(pattern)
         cVal = patterns.get(normPattern, [])
         cVal.append((aX, aY))
+        # This could be done once in last/p2 part
         cVal.sort(key=lambda v: getPatternRepeats(cX, cY, v[0], v[1], normPattern))
         patterns[normPattern] = cVal
 
@@ -113,24 +84,22 @@ def findPosOfXDestructedAsteroid(center, patterns, desiredX):
     sortedPatterns = sorted(patterns.keys(), key=lambda p: getAngle(cX, cY, p[0], p[1]))
 
     destr = 0
-
     idx = 0
     pCopy = patterns.copy()
     while True:
         key = sortedPatterns[idx]
         idxAsts = pCopy[key]
-        print('pattern', key, 'has asteroids at', idxAsts)
         if len(idxAsts) == 0:
             idx += 1
             continue
 
-        print('destroying', idxAsts[0])
         destr += 1
         if destr == 200:
+            print(idxAsts[0][0] * 100 + idxAsts[0][1])
             break
         pCopy[key] = idxAsts[1:]
         idx += 1
         if idx >= len(sortedPatterns):
             idx = 0
-print(maxAP)
+
 findPosOfXDestructedAsteroid(maxAP, gPatterns[maxAP], 200)
